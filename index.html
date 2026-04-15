@@ -1,3 +1,591 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoodYnuff® — Wine & Lifestyle Accessories</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--rose:#E8175D;--mag:#B5124F;--gold:#D4A843;--gold2:#F0C96A;--cream:#FAF3E8;--dark:#060309;--mid:#0F0812;--card:#140B18;--muted:rgba(250,243,232,0.4);}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);font-family:'Outfit',sans-serif;color:var(--cream);overflow-x:hidden;cursor:none;}
+.cursor{position:fixed;width:8px;height:8px;background:var(--rose);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s;}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(232,23,93,0.5);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:22px 56px;background:linear-gradient(to bottom,rgba(6,3,9,.98),transparent);}
+.logo{font-family:‘Playfair Display’,serif;font-size:1.5rem;font-weight:700;color:var(–cream);}
+.logo span{color:var(–rose);}
+.nav-r{display:flex;gap:36px;align-items:center;}
+.nav-r a{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(–muted);text-decoration:none;transition:color .3s;}
+.nav-r a:hover{color:var(–gold2);}
+.nav-shop{background:linear-gradient(135deg,var(–mag),var(–rose));color:#fff!important;padding:10px 26px;font-weight:600!important;box-shadow:0 0 24px rgba(232,23,93,.35);transition:all .3s!important;}
+.nav-shop:hover{box-shadow:0 0 40px rgba(232,23,93,.6)!important;transform:translateY(-1px)!important;}
+
+/* HERO */
+#scroll-driver{height:550vh;position:relative;}
+#sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;}
+#canvas3d{position:absolute;inset:0;z-index:1;}
+.hero-atmo{position:absolute;inset:0;z-index:2;background:linear-gradient(108deg,rgba(6,3,9,.97) 0%,rgba(6,3,9,.88) 35%,rgba(6,3,9,.3) 60%,transparent 100%),radial-gradient(ellipse 55% 70% at 72% 50%,rgba(180,18,79,.3) 0%,transparent 65%);pointer-events:none;}
+.hero-line{position:absolute;top:0;right:38%;bottom:0;z-index:3;width:1px;background:linear-gradient(to bottom,transparent,rgba(212,168,67,.15) 30%,rgba(232,23,93,.2) 60%,transparent);pointer-events:none;}
+
+.hero-text{position:relative;z-index:10;margin-left:7vw;max-width:560px;}
+.hero-text > *{opacity:0;transform:translateY(28px);}
+.loaded .t1{animation:up .8s ease .1s forwards;}
+.loaded .t2{animation:up .9s ease .25s forwards;}
+.loaded .t3{animation:up .8s ease .4s forwards;}
+.loaded .t4{animation:up .8s ease .55s forwards;}
+.loaded .t5{animation:up .8s ease .7s forwards;}
+@keyframes up{to{opacity:1;transform:translateY(0);}}
+
+.kicker{display:flex;align-items:center;gap:14px;font-size:.58rem;letter-spacing:.45em;text-transform:uppercase;color:var(–gold);margin-bottom:28px;}
+.kicker::before{content:’’;width:36px;height:1px;background:var(–gold);}
+.hero-h1{font-family:‘Playfair Display’,serif;font-size:clamp(3.2rem,6.5vw,6.5rem);font-weight:900;line-height:1;color:var(–cream);margin-bottom:6px;letter-spacing:-.02em;}
+.hero-h1 em{font-style:italic;font-weight:400;color:var(–rose);display:block;font-size:.85em;}
+.hero-p{font-size:.8rem;line-height:1.95;color:var(–muted);max-width:360px;margin-bottom:40px;font-weight:300;}
+.hero-btns{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:48px;}
+.btn-main{background:linear-gradient(135deg,var(–mag),var(–rose));color:#fff;padding:16px 40px;text-decoration:none;font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;font-weight:600;box-shadow:0 0 50px rgba(232,23,93,.4);transition:all .3s;border:none;cursor:none;font-family:‘Outfit’,sans-serif;display:inline-block;}
+.btn-main:hover{box-shadow:0 0 80px rgba(232,23,93,.65);transform:translateY(-3px);}
+.btn-line{color:var(–muted);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:12px;transition:color .3s;background:none;border:none;cursor:none;font-family:‘Outfit’,sans-serif;}
+.btn-line::after{content:‘→’;font-size:1.1rem;transition:transform .3s;}
+.btn-line:hover{color:var(–gold2);}
+.btn-line:hover::after{transform:translateX(6px);}
+.hero-price{display:inline-flex;align-items:baseline;gap:10px;padding:14px 24px;border:1px solid rgba(212,168,67,.2);background:rgba(212,168,67,.04);}
+.price-amt{font-family:‘Playfair Display’,serif;font-size:2.6rem;font-weight:400;color:var(–cream);line-height:1;}
+.price-desc{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:var(–muted);}
+
+.scroll-cue{position:absolute;bottom:32px;left:7vw;z-index:10;display:flex;align-items:center;gap:14px;font-size:.52rem;letter-spacing:.4em;text-transform:uppercase;color:rgba(250,243,232,.2);}
+.scroll-line{width:1px;height:48px;background:linear-gradient(to bottom,rgba(232,23,93,.5),transparent);animation:sdrop 2s ease-in-out infinite;}
+@keyframes sdrop{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform:scaleY(1);transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+.phud{position:absolute;right:4vw;top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:12px;}
+.hi{font-size:.52rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(250,243,232,.18);padding:7px 16px;border-left:1px solid rgba(250,243,232,.05);transition:all .5s;}
+.hi.on{color:var(–gold2);border-left-color:var(–rose);background:rgba(232,23,93,.07);}
+
+/* MARQUEE */
+.mwrap{overflow:hidden;border-top:1px solid rgba(232,23,93,.12);border-bottom:1px solid rgba(232,23,93,.12);padding:16px 0;background:rgba(180,18,79,.05);}
+.mtrack{display:flex;gap:60px;animation:mq 20s linear infinite;white-space:nowrap;}
+.mtrack span{font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;color:var(–gold);opacity:.65;display:flex;align-items:center;gap:20px;}
+.mtrack span::after{content:‘◆’;font-size:.38rem;}
+@keyframes mq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* SPECS */
+.specs{display:flex;border-top:1px solid rgba(250,243,232,.04);border-bottom:1px solid rgba(250,243,232,.04);background:rgba(20,11,24,.6);}
+.spec{flex:1;padding:30px 40px;border-right:1px solid rgba(250,243,232,.04);transition:background .3s;}
+.spec:last-child{border-right:none;}
+.spec:hover{background:rgba(250,243,232,.02);}
+.spec-n{font-family:‘Playfair Display’,serif;font-size:2.2rem;font-weight:400;color:var(–rose);line-height:1;}
+.spec-l{font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(250,243,232,.28);margin-top:5px;}
+
+/* SECTIONS */
+.sec{padding:90px 56px;}
+.slabel{font-size:.56rem;letter-spacing:.45em;text-transform:uppercase;color:var(–gold);margin-bottom:12px;display:flex;align-items:center;gap:14px;}
+.slabel::before{content:’’;width:28px;height:1px;background:var(–gold);}
+.sec-h{font-family:‘Playfair Display’,serif;font-size:clamp(2rem,4vw,3.4rem);font-weight:700;color:var(–cream);line-height:1.15;margin-bottom:48px;}
+.sec-h em{font-style:italic;color:var(–rose);font-weight:400;}
+
+/* FILTERS */
+.fbar{display:flex;gap:3px;margin-bottom:40px;flex-wrap:wrap;}
+.fb{padding:9px 22px;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;background:transparent;border:1px solid rgba(250,243,232,.07);color:var(–muted);cursor:pointer;transition:all .3s;font-family:‘Outfit’,sans-serif;}
+.fb.on,.fb:hover{background:var(–rose);border-color:var(–rose);color:#fff;}
+
+/* PRODUCTS */
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(250,243,232,.03);}
+.pc{background:var(–card);cursor:pointer;transition:background .4s;position:relative;overflow:hidden;display:none;flex-direction:column;}
+.pc.show{display:flex;}
+.pc:hover{background:#1C0E22;}
+.pc::after{content:’’;position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(–rose),transparent);transform:scaleX(0);transition:transform .5s;}
+.pc:hover::after{transform:scaleX(1);}
+.pimg{width:100%;aspect-ratio:1;overflow:hidden;background:#0A0610;display:flex;align-items:center;justify-content:center;position:relative;}
+.pimg img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.25,.46,.45,.94);filter:brightness(.95) contrast(1.05);}
+.pc:hover .pimg img{transform:scale(1.1);}
+.pimg-placeholder{font-size:2.8rem;opacity:.35;}
+.pbadge{position:absolute;top:14px;left:14px;z-index:2;font-size:.46rem;letter-spacing:.16em;text-transform:uppercase;padding:5px 12px;}
+.hot{background:var(–rose);color:#fff;}
+.new{background:var(–gold);color:var(–dark);}
+.pbody{padding:24px;}
+.pname{font-family:‘Playfair Display’,serif;font-size:1rem;font-weight:400;color:var(–cream);margin-bottom:5px;line-height:1.3;}
+.pprice{font-size:.82rem;color:var(–rose);font-weight:500;margin-bottom:16px;}
+.pcta{width:100%;padding:10px;font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;background:transparent;border:1px solid rgba(232,23,93,.2);color:var(–muted);cursor:pointer;font-family:‘Outfit’,sans-serif;transition:all .3s;}
+.pcta:hover{background:var(–rose);border-color:var(–rose);color:#fff;}
+.vall{text-align:center;margin-top:56px;}
+
+/* FEATURES */
+.fstrip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(250,243,232,.04);border-bottom:1px solid rgba(250,243,232,.04);}
+.fsi{padding:56px 48px;border-right:1px solid rgba(250,243,232,.04);transition:background .4s;position:relative;overflow:hidden;}
+.fsi:last-child{border-right:none;}
+.fsi:hover{background:rgba(232,23,93,.04);}
+.fsn{font-family:‘Playfair Display’,serif;font-size:5rem;font-weight:900;color:var(–rose);opacity:.06;position:absolute;top:20px;right:24px;line-height:1;}
+.fsicon{font-size:2rem;margin-bottom:20px;display:block;}
+.fstitle{font-family:‘Playfair Display’,serif;font-size:1.3rem;font-weight:400;color:var(–cream);margin-bottom:12px;}
+.fsp{font-size:.72rem;line-height:1.9;color:var(–muted);font-weight:300;}
+
+/* GIFT */
+.gsec{padding:90px 56px;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(100,10,45,.25) 0%,transparent 70%),var(–mid);position:relative;overflow:hidden;}
+.gsec::before{content:‘GIFT’;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:‘Playfair Display’,serif;font-size:20vw;font-weight:900;color:rgba(232,23,93,.02);white-space:nowrap;pointer-events:none;}
+.ginner{position:relative;z-index:2;max-width:680px;margin:0 auto;text-align:center;}
+.ginner .slabel{justify-content:center;}
+.ginner .slabel::before{display:none;}
+.gh{font-family:‘Playfair Display’,serif;font-size:clamp(2.4rem,5vw,4.2rem);font-weight:700;color:var(–cream);line-height:1.1;margin-bottom:16px;}
+.gh em{font-style:italic;color:var(–rose);font-weight:400;}
+.gsub{font-size:.76rem;color:var(–muted);line-height:1.9;margin-bottom:48px;font-weight:300;}
+.gopts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:36px;}
+.go{padding:28px 16px;background:rgba(250,243,232,.02);border:1px solid rgba(232,23,93,.12);cursor:pointer;transition:all .3s;}
+.go:hover,.go.on{background:rgba(232,23,93,.1);border-color:var(–rose);transform:translateY(-4px);box-shadow:0 8px 32px rgba(232,23,93,.2);}
+.goicon{font-size:2rem;margin-bottom:10px;display:block;}
+.golbl{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(–muted);}
+
+/* TESTIMONIALS */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(250,243,232,.03);margin-top:48px;}
+.tc{background:var(–card);padding:44px 36px;transition:background .3s;}
+.tc:hover{background:#1C0E22;}
+.tq{font-family:‘Playfair Display’,serif;font-size:4rem;color:var(–rose);opacity:.2;line-height:.3;margin-bottom:20px;font-weight:900;}
+.tstars{color:var(–gold);font-size:.68rem;letter-spacing:4px;margin-bottom:14px;}
+.ttxt{font-family:‘Playfair Display’,serif;font-size:1rem;font-style:italic;font-weight:400;color:var(–cream);line-height:1.8;margin-bottom:22px;opacity:.85;}
+.tauth{font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;color:var(–muted);}
+
+/* CHAT */
+.chat-wrap{position:fixed;bottom:28px;right:28px;z-index:600;}
+.chat-btn{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(–mag),var(–rose));border:none;cursor:pointer;font-size:1.5rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 32px rgba(232,23,93,.55);transition:transform .3s,box-shadow .3s;}
+.chat-btn:hover{transform:scale(1.1);box-shadow:0 6px 48px rgba(232,23,93,.75);}
+.cpopup{position:absolute;bottom:76px;right:0;width:340px;background:var(–card);border:1px solid rgba(232,23,93,.2);display:none;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:popUp .3s ease;}
+.cpopup.open{display:flex;}
+@keyframes popUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.chead{background:linear-gradient(135deg,var(–mag),var(–rose));padding:16px 20px;display:flex;align-items:center;gap:12px;}
+.cav{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.cname{font-size:.8rem;font-weight:600;color:#fff;}
+.cstatus{font-size:.58rem;color:rgba(255,255,255,.65);}
+.cbody{flex:1;height:220px;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px;}
+.cbody::-webkit-scrollbar{width:3px;}
+.cbody::-webkit-scrollbar-thumb{background:var(–rose);}
+.msg{padding:10px 14px;font-size:.72rem;line-height:1.6;max-width:85%;}
+.mbot{background:rgba(250,243,232,.06);color:var(–cream);align-self:flex-start;}
+.musr{background:rgba(232,23,93,.15);color:var(–cream);align-self:flex-end;border:1px solid rgba(232,23,93,.2);}
+.typing{display:flex;gap:4px;padding:12px 14px;align-self:flex-start;}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(–rose);opacity:.4;animation:bl 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bl{0%,100%{opacity:.4;}50%{opacity:1;}}
+.cinrow{display:flex;border-top:1px solid rgba(250,243,232,.06);}
+.cin{flex:1;padding:14px 16px;background:transparent;border:none;outline:none;font-size:.72rem;color:var(–cream);font-family:‘Outfit’,sans-serif;}
+.cin::placeholder{color:rgba(250,243,232,.2);}
+.csend{padding:14px 20px;background:var(–rose);border:none;cursor:pointer;color:#fff;font-size:1rem;transition:background .3s;}
+.csend:hover{background:#ff2070;}
+
+/* FOOTER */
+footer{padding:80px 56px 40px;border-top:1px solid rgba(232,23,93,.1);background:var(–mid);}
+.fgrid{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr;gap:56px;margin-bottom:56px;}
+.fbrand{font-family:‘Playfair Display’,serif;font-size:1.9rem;font-weight:700;color:var(–cream);margin-bottom:14px;}
+.fbrand span{color:var(–rose);}
+.ftag{font-size:.72rem;color:var(–muted);line-height:1.85;max-width:270px;font-weight:300;}
+.fcolt{font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:var(–gold);margin-bottom:20px;}
+.flinks{list-style:none;}
+.flinks li{margin-bottom:10px;}
+.flinks a{font-size:.72rem;color:var(–muted);text-decoration:none;transition:color .3s;}
+.flinks a:hover{color:var(–cream);}
+.fbot{border-top:1px solid rgba(250,243,232,.04);padding-top:28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+.fcopy{font-size:.58rem;letter-spacing:.1em;color:rgba(250,243,232,.2);}
+.socs{display:flex;gap:10px;}
+.soc{width:36px;height:36px;border-radius:50%;border:1px solid rgba(250,243,232,.08);display:flex;align-items:center;justify-content:center;color:var(–muted);text-decoration:none;font-size:.7rem;transition:all .3s;}
+.soc:hover{border-color:var(–rose);color:var(–rose);background:rgba(232,23,93,.08);}
+
+@media(max-width:1024px){
+nav{padding:18px 28px;}
+.sec,.gsec{padding:64px 28px;}
+footer{padding:60px 28px 36px;}
+.pgrid{grid-template-columns:repeat(2,1fr);}
+.specs{flex-wrap:wrap;}
+.spec{min-width:50%;}
+.tgrid{grid-template-columns:1fr;}
+.fgrid{grid-template-columns:1fr 1fr;}
+.gopts{grid-template-columns:1fr;}
+.fstrip{grid-template-columns:1fr;}
+.phud{display:none;}
+.cursor,.cursor-ring{display:none;}
+body{cursor:auto;}
+a,button{cursor:pointer;}
+}
+@media(max-width:640px){
+.pgrid{grid-template-columns:1fr;}
+.hero-h1{font-size:3rem;}
+.fgrid{grid-template-columns:1fr;}
+nav{padding:14px 20px;}
+.nav-r a:not(.nav-shop){display:none;}
+}
+</style>
+
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="curR"></div>
+
+<nav>
+  <div class="logo">Good<span>Y</span>nuff<sup style="font-size:.4rem;opacity:.4">®</sup></div>
+  <div class="nav-r">
+    <a href="#products">Shop</a>
+    <a href="#why">About</a>
+    <a href="#gift">Gifts</a>
+    <a href="https://goodynuff-llc.square.site" target="_blank" class="nav-shop">Buy Now</a>
+  </div>
+</nav>
+
+<div id="scroll-driver">
+  <div id="sticky">
+    <canvas id="canvas3d"></canvas>
+    <div class="hero-atmo"></div>
+    <div class="hero-line"></div>
+
+```
+<div class="hero-text" id="ht">
+  <div class="kicker t1">Best Seller · GoodYnuff® · Henderson, NV</div>
+  <div id="pt">
+    <h1 class="hero-h1 t2">The Opener<br><em>They'll Never<br>Forget.</em></h1>
+  </div>
+  <p class="hero-p t3">Seven precision tools. One unforgettable experience. Scroll to watch the set come alive.</p>
+  <div class="hero-btns t4">
+    <a href="https://goodynuff-llc.square.site" target="_blank" class="btn-main">Shop Now — $35</a>
+    <button class="btn-line" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">View All Products</button>
+  </div>
+  <div class="hero-price t5">
+    <div class="price-amt">$35</div>
+    <div class="price-desc">7-Piece Complete Set<br>Free Shipping $75+</div>
+  </div>
+</div>
+
+<div class="phud">
+  <div class="hi" id="h0">Rabbit Lever</div>
+  <div class="hi" id="h1">Foil Cutter</div>
+  <div class="hi" id="h2">Wine Stopper</div>
+  <div class="hi" id="h3">Wine Pourer</div>
+  <div class="hi" id="h4">Spare Worm</div>
+  <div class="hi" id="h5">Display Stand</div>
+  <div class="hi" id="h6">Bottle Brush</div>
+</div>
+
+<div class="scroll-cue"><div class="scroll-line"></div>Scroll to explore</div>
+```
+
+  </div>
+</div>
+
+<div class="mwrap">
+  <div class="mtrack">
+    <span>Wine Accessories</span><span>Cigar Essentials</span><span>Gift Sets</span><span>Personalization Available</span><span>GoodYnuff® Branded</span><span>Free Shipping $75+</span><span>Our Goal Is To Wine You Over</span>
+    <span>Wine Accessories</span><span>Cigar Essentials</span><span>Gift Sets</span><span>Personalization Available</span><span>GoodYnuff® Branded</span><span>Free Shipping $75+</span><span>Our Goal Is To Wine You Over</span>
+  </div>
+</div>
+
+<div class="specs">
+  <div class="spec"><div class="spec-n">7</div><div class="spec-l">Precision Pieces</div></div>
+  <div class="spec"><div class="spec-n">$35</div><div class="spec-l">Complete Set</div></div>
+  <div class="spec"><div class="spec-n">★ 5.0</div><div class="spec-l">Customer Rating</div></div>
+  <div class="spec"><div class="spec-n">25+</div><div class="spec-l">Products</div></div>
+</div>
+
+<section class="sec" id="products">
+  <div class="slabel">Full Catalog</div>
+  <h2 class="sec-h">Shop <em>GoodYnuff®</em></h2>
+  <div class="fbar">
+    <button class="fb on" onclick="filt('all',this)">All Items</button>
+    <button class="fb" onclick="filt('wine',this)">Wine</button>
+    <button class="fb" onclick="filt('cigar',this)">Cigar</button>
+    <button class="fb" onclick="filt('gifts',this)">Gifts</button>
+  </div>
+  <div class="pgrid">
+
+```
+<div class="pc show" data-cat="wine" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p7_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>🍾</div>'" alt="7 Piece Rabbit Wine Opener"><span class="pbadge hot">Best Seller</span></div>
+  <div class="pbody"><div class="pname">7 Piece Rabbit Wine Opener</div><div class="pprice">$35.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="wine" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p3_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>🍷</div>'" alt="Wine Decanter"></div>
+  <div class="pbody"><div class="pname">Wine Decanter</div><div class="pprice">$15.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="wine" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p5_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>❄️</div>'" alt="Wine Chiller Stick"></div>
+  <div class="pbody"><div class="pname">Wine Chiller Stick</div><div class="pprice">$15.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="wine" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">🌬️</div></div>
+  <div class="pbody"><div class="pname">Rechargeable Wine Aerator</div><div class="pprice">$25.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="wine" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">🥤</div></div>
+  <div class="pbody"><div class="pname">Wine Tumblers</div><div class="pprice">$10.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="wine" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p17_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>🔑</div>'" alt="Pocket Wine Opener"></div>
+  <div class="pbody"><div class="pname">Pocket Wine Opener</div><div class="pprice">$15.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="gifts" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">🎀</div><span class="pbadge hot">Popular</span></div>
+  <div class="pbody"><div class="pname">Wine Chiller Gift Set</div><div class="pprice">$30.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="gifts" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">🍽️</div></div>
+  <div class="pbody"><div class="pname">Wine Serving Sets</div><div class="pprice">$30.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="gifts" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">✍️</div></div>
+  <div class="pbody"><div class="pname">Personalization</div><div class="pprice">$15.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p9_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>🪵</div>'" alt="Cigar Humidor Set"><span class="pbadge hot">Top Pick</span></div>
+  <div class="pbody"><div class="pname">Cigar Humidor Set</div><div class="pprice">$60.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p10_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>✂️</div>'" alt="Cigar Cutter"></div>
+  <div class="pbody"><div class="pname">Cigar Cutter</div><div class="pprice">$25.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p11_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>🔥</div>'" alt="Cigar Torch Lighter"></div>
+  <div class="pbody"><div class="pname">Cigar Torch Lighter</div><div class="pprice">$25.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">💨</div></div>
+  <div class="pbody"><div class="pname">Folding Ashtray For Cigar</div><div class="pprice">$40.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">🧳</div></div>
+  <div class="pbody"><div class="pname">Leather Portable Humidor</div><div class="pprice">$50.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><img src="https://goodynuff-llc.square.site/uploads/1/3/3/0/133041689/s714905686456946637_p2_i1_w640.jpeg" onerror="this.outerHTML='<div class=pimg-placeholder>🔥</div>'" alt="Lighter with Cutter"></div>
+  <div class="pbody"><div class="pname">Lighter with Cutter</div><div class="pprice">$35.00</div><button class="pcta">Shop Now</button></div>
+</div>
+
+<div class="pc show" data-cat="cigar" onclick="window.open('https://goodynuff-llc.square.site','_blank')">
+  <div class="pimg"><div class="pimg-placeholder">🥃</div></div>
+  <div class="pbody"><div class="pname">Smoker Set</div><div class="pprice">$40.00</div><button class="pcta">Shop Now</button></div>
+</div>
+```
+
+  </div>
+  <div class="vall"><a href="https://goodynuff-llc.square.site" target="_blank" class="btn-main">View All 25 Products →</a></div>
+</section>
+
+<div class="fstrip" id="why">
+  <div class="fsi"><div class="fsn">01</div><span class="fsicon">🍷</span><div class="fstitle">Curated Quality</div><p class="fsp">Every product hand-selected for durability, elegance, and the experience it brings to life's finest moments.</p></div>
+  <div class="fsi"><div class="fsn">02</div><span class="fsicon">✨</span><div class="fstitle">GoodYnuff® Branded</div><p class="fsp">Our signature branding turns every product into a statement piece — gifting a moment worth remembering.</p></div>
+  <div class="fsi"><div class="fsn">03</div><span class="fsicon">🎁</span><div class="fstitle">Gift-Ready Always</div><p class="fsp">Every item is curated to make the perfect gift for any occasion, any budget, any person in your life.</p></div>
+</div>
+
+<div class="gsec" id="gift">
+  <div class="ginner">
+    <div class="slabel" style="justify-content:center">Gift Finder</div>
+    <h2 class="gh">Find the <em>Perfect Gift</em></h2>
+    <p class="gsub">Pick a vibe and we'll point you to the right collection.</p>
+    <div class="gopts">
+      <div class="go" onclick="this.classList.toggle('on')"><span class="goicon">🍷</span><div class="golbl">Wine Lover</div></div>
+      <div class="go" onclick="this.classList.toggle('on')"><span class="goicon">🥃</span><div class="golbl">Cigar Enthusiast</div></div>
+      <div class="go" onclick="this.classList.toggle('on')"><span class="goicon">🎁</span><div class="golbl">Gift Set</div></div>
+    </div>
+    <a href="https://goodynuff-llc.square.site" target="_blank" class="btn-main">Explore Gifts</a>
+  </div>
+</div>
+
+<section class="sec">
+  <div class="slabel">Reviews</div>
+  <h2 class="sec-h">What People <em>Say</em></h2>
+  <div class="tgrid">
+    <div class="tc"><div class="tq">"</div><div class="tstars">★★★★★</div><p class="ttxt">Got the Wine Chiller Gift Set for my mom's birthday — she absolutely loved it. Quality felt premium, packaging gorgeous.</p><div class="tauth">— Verified Customer</div></div>
+    <div class="tc"><div class="tq">"</div><div class="tstars">★★★★★</div><p class="ttxt">The Rabbit Wine Opener is the best I've ever used. Smooth, fast, beautiful branding. Bought as a gift and now I need one myself.</p><div class="tauth">— Verified Customer</div></div>
+    <div class="tc"><div class="tq">"</div><div class="tstars">★★★★★</div><p class="ttxt">The Cigar Humidor Set is stunning. Great quality, fast shipping, and the GoodYnuff branding makes it feel like a luxury purchase.</p><div class="tauth">— Verified Customer</div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="fgrid">
+    <div><div class="fbrand">Good<span>Y</span>nuff<sup style="font-size:.4rem;opacity:.4">®</sup></div><p class="ftag">Our goal is to wine you over. Premium wine and lifestyle accessories curated for those who appreciate the good things in life. Henderson, Nevada.</p></div>
+    <div><div class="fcolt">Shop</div><ul class="flinks"><li><a href="#">Wine Accessories</a></li><li><a href="#">Cigar Essentials</a></li><li><a href="#">Gift Sets</a></li><li><a href="#">Personalization</a></li></ul></div>
+    <div><div class="fcolt">Info</div><ul class="flinks"><li><a href="#">About Us</a></li><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">FAQ</a></li></ul></div>
+    <div><div class="fcolt">Connect</div><ul class="flinks"><li><a href="#">Facebook</a></li><li><a href="#">Instagram</a></li><li><a href="#">Text Us</a></li></ul></div>
+  </div>
+  <div class="fbot">
+    <div class="fcopy">© 2025 GoodYnuff LLC · Henderson, NV · All rights reserved.</div>
+    <div class="socs"><a href="#" class="soc">f</a><a href="#" class="soc">ig</a></div>
+  </div>
+</footer>
+
+<div class="chat-wrap">
+  <div class="cpopup" id="cpop">
+    <div class="chead"><div class="cav">🍷</div><div><div class="cname">GoodYnuff Assistant</div><div class="cstatus">● Online — Ask me anything</div></div></div>
+    <div class="cbody" id="cbody"><div class="msg mbot">Hi! 👋 Welcome to GoodYnuff. Looking for a gift or something for yourself? I can help you find the perfect wine or cigar accessory.</div></div>
+    <div class="cinrow"><input class="cin" id="cin" placeholder="Ask about our products..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="csend" onclick="sendMsg()">→</button></div>
+  </div>
+  <button class="chat-btn" onclick="document.getElementById('cpop').classList.toggle('open')">💬</button>
+</div>
+
+<script>
+// CURSOR
+const c=document.getElementById('cur'),cr=document.getElementById('curR');
+document.addEventListener('mousemove',e=>{
+  c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';
+  cr.style.left=e.clientX+'px';cr.style.top=e.clientY+'px';
+});
+
+// THREE.JS
+const canvas=document.getElementById('canvas3d');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.3;
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.1,100);
+camera.position.set(0,.5,8);
+function rsz(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
+rsz();window.addEventListener('resize',rsz);
+
+// LIGHTS
+scene.add(new THREE.AmbientLight(0x0A0510,4));
+const kl=new THREE.SpotLight(0xE8175D,35,28,Math.PI/6,.4);
+kl.position.set(4,6,6);scene.add(kl);
+const fl=new THREE.PointLight(0xD4A843,10,18);
+fl.position.set(-5,-1,4);scene.add(fl);
+const rl=new THREE.PointLight(0x6060FF,5,14);
+rl.position.set(0,-5,-4);scene.add(rl);
+const bl2=new THREE.PointLight(0xB5124F,7,12);
+bl2.position.set(0,-4,2);scene.add(bl2);
+
+// MATERIALS
+const BRZ=new THREE.MeshStandardMaterial({color:0xB87333,metalness:.96,roughness:.14});
+const DBRZ=new THREE.MeshStandardMaterial({color:0x6B3410,metalness:.9,roughness:.2});
+const SLV=new THREE.MeshStandardMaterial({color:0xD4D4D4,metalness:.98,roughness:.08});
+const GLD=new THREE.MeshStandardMaterial({color:0xD4A843,metalness:.95,roughness:.12});
+const RSE=new THREE.MeshStandardMaterial({color:0xC2185B,metalness:.3,roughness:.5,emissive:0x3D0515,emissiveIntensity:.3});
+const DRK=new THREE.MeshStandardMaterial({color:0x1A0A0A,metalness:.2,roughness:.85});
+
+// 7 PIECES
+const g0=new THREE.Group();
+g0.add(Object.assign(new THREE.Mesh(new THREE.CapsuleGeometry(.32,1.4,12,24),BRZ)));
+const a=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,1.1,12),BRZ);
+a.position.set(.4,.2,0);a.rotation.z=.5;g0.add(a);
+const kb=new THREE.Mesh(new THREE.SphereGeometry(.14,16,16),DBRZ);
+kb.position.y=.85;g0.add(kb);
+scene.add(g0);
+
+const g1=new THREE.Group();
+g1.add(new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.14,48),SLV));
+const cr2=new THREE.Mesh(new THREE.TorusGeometry(.38,.03,8,48),GLD);
+g1.add(cr2);scene.add(g1);
+
+const g2=new THREE.Group();
+g2.add(new THREE.Mesh(new THREE.CylinderGeometry(.12,.2,.9,20),BRZ));
+const st=new THREE.Mesh(new THREE.SphereGeometry(.16,16,16),DBRZ);
+st.position.y=.5;g2.add(st);scene.add(g2);
+
+const g3=new THREE.Group();
+g3.add(new THREE.Mesh(new THREE.CylinderGeometry(.08,.18,.9,16),RSE));
+const pt2=new THREE.Mesh(new THREE.TorusGeometry(.12,.04,8,16,Math.PI),SLV);
+pt2.position.y=.45;g3.add(pt2);scene.add(g3);
+
+const g4=new THREE.Group();
+g4.add(new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.8,8),SLV));
+for(let i=0;i<8;i++){const w=new THREE.Mesh(new THREE.TorusGeometry(.12,.025,6,12,Math.PI*.6),SLV);w.position.y=-.3+i*.09;w.rotation.y=i*.7;w.rotation.x=Math.PI/2;g4.add(w);}
+scene.add(g4);
+
+const g5=new THREE.Group();
+const sb=new THREE.Mesh(new THREE.BoxGeometry(1.8,.08,.9),DRK);
+g5.add(sb);
+const se=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.8,.08,.9)),new THREE.LineBasicMaterial({color:0xD4A843}));
+g5.add(se);scene.add(g5);
+
+const g6=new THREE.Group();
+g6.add(new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,1.1,12),GLD));
+const br=new THREE.Mesh(new THREE.SphereGeometry(.18,12,8),new THREE.MeshStandardMaterial({color:0xEEEEEE,metalness:0,roughness:.9}));
+br.position.y=.65;g6.add(br);scene.add(g6);
+
+const pieces=[
+  {g:g0,h:[0,0,0],e:[0,0,3.2]},
+  {g:g1,h:[1.2,.7,.4],e:[3.2,1.8,1.2]},
+  {g:g2,h:[-1.2,.7,.3],e:[-3.2,1.8,1]},
+  {g:g3,h:[-1.2,-.8,.3],e:[-2.8,-2.2,.8]},
+  {g:g4,h:[1.2,-.8,.3],e:[2.8,-2.2,.8]},
+  {g:g5,h:[0,-1.4,0],e:[0,-3.5,.6]},
+  {g:g6,h:[0,1.5,.4],e:[0,3.5,1.2]},
+];
+pieces.forEach(p=>p.g.position.set(...p.h));
+
+// PARTICLES
+const pg=new THREE.BufferGeometry();
+const pp=new Float32Array(200*3);
+for(let i=0;i<600;i++)pp[i]=(Math.random()-.5)*(i%3===2?10:22);
+pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+scene.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xE8175D,size:.035,transparent:true,opacity:.25})));
+
+let cu=0,tg=0;
+window.addEventListener('scroll',()=>{
+  const el=document.getElementById('scroll-driver');
+  const sc=-el.getBoundingClientRect().top;
+  const tot=el.offsetHeight-innerHeight;
+  tg=Math.max(0,Math.min(1,sc/tot));
+  const p=Math.min(scrollY/(innerHeight*2.5),1);
+  document.getElementById('pt').style.transform=`translateY(${p*-30}px)`;
+});
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function uhud(p){for(let i=0;i<7;i++){const el=document.getElementById('h'+i);if(el)el.classList.toggle('on',i<=Math.floor(p*7)&&p>.04);}}
+
+const clk=new THREE.Clock();
+(function loop(){
+  requestAnimationFrame(loop);
+  const dt=clk.getDelta(),et=clk.getElapsedTime();
+  cu+=(tg-cu)*.055;
+  pieces.forEach((p,i)=>{
+    p.g.position.x=lerp(p.h[0],p.h[0]+p.e[0],cu);
+    p.g.position.y=lerp(p.h[1],p.h[1]+p.e[1],cu)+Math.sin(et*.7+i*.8)*.05;
+    p.g.position.z=lerp(p.h[2],p.h[2]+p.e[2],cu);
+    p.g.rotation.x+=dt*(.3+i*.05);
+    p.g.rotation.y+=dt*(.2+i*.04);
+  });
+  scene.rotation.y=Math.sin(et*.12)*.25+et*.006;
+  scene.rotation.x=Math.sin(et*.08)*.04;
+  kl.intensity=35+Math.sin(et*1.5)*5;
+  uhud(cu);
+  renderer.render(scene,camera);
+})();
+
+function filt(cat,btn){
+  document.querySelectorAll('.pc').forEach(p=>p.classList.toggle('show',cat==='all'||p.dataset.cat===cat));
+  document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+const replies=["Our 7 Piece Rabbit Wine Opener is the #1 seller — just $35 and it comes with everything you need! 🍷","Looking for a gift? The Wine Chiller Gift Set ($30) or Cigar Humidor Set ($60) are both incredible choices.","We offer personalization on select items! Makes any gift truly one-of-a-kind. 🎁","The Rechargeable Wine Aerator ($25) is a game-changer — noticeably improves the taste of any red wine.","All orders over $75 ship free! Browse our full catalog on the Square store.","The Cigar Torch Lighter ($25) pairs perfectly with our Humidor Set — a complete luxury gift.","We're based in Henderson, Nevada — our goal is simple: to wine you over! 🥂"];
+let ri=0;
+function sendMsg(){
+  const inp=document.getElementById('cin'),body=document.getElementById('cbody'),val=inp.value.trim();
+  if(!val)return;
+  const um=document.createElement('div');um.className='msg musr';um.textContent=val;body.appendChild(um);
+  inp.value='';
+  const ty=document.createElement('div');ty.className='typing';ty.innerHTML='<span></span><span></span><span></span>';
+  body.appendChild(ty);body.scrollTop=body.scrollHeight;
+  setTimeout(()=>{ty.remove();const bm=document.createElement('div');bm.className='msg mbot';bm.textContent=replies[ri%replies.length];ri++;body.appendChild(bm);body.scrollTop=body.scrollHeight;},1000);
+}
+
+setTimeout(()=>document.body.classList.add('loaded'),150);
+</script>
+
+</body>
+</html>
 
 
